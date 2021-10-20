@@ -1,0 +1,5 @@
+        <form method="post" enctype="multipart/form-data">
+            <label for="archivo">Selecciona el archivo</label>
+            <input type="file" name="archivo"><br>
+            <input type="submit" value="Enviar">
+        </form>
