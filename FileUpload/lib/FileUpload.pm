@@ -24,7 +24,7 @@ post '/enviar' => sub {
             );
 
             my $bucket =  $s3->bucket('hackathon-test-bbva-2021');
-            $bucket->add_key(time, $archivo->content, { content_type => 'text/plain');
+            $bucket->add_key(time, $archivo->content, { content_type => 'text/plain'});
     }
 
     return template 'enviar';
