@@ -18,7 +18,7 @@ post '/enviar' => sub {
 
     foreach my $archivo (@archivos) {
             my $s3 = Amazon::S3->new({
-                    aws_secret_key_id => 'AKIAWX5GLZKAQIFDZJCM',
+                    aws_access_key_id => 'AKIAWX5GLZKAQIFDZJCM',
                     aws_secret_access_key => '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',
                     retry => 1
             });
