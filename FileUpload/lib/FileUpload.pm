@@ -1,7 +1,8 @@
 package FileUpload;
 use Dancer ':syntax';
 
-use Amazon::S3;
+use Amazon::S3::Thin;
+use Data::Dumper;
 
 our $VERSION = '0.1';
 
@@ -17,14 +18,17 @@ post '/enviar' => sub {
     my @archivos = request->upload('archivo');
 
     foreach my $archivo (@archivos) {
-            my $s3 = Amazon::S3->new({
+            my $s3 = Amazon::S3::Thin->new({
                     aws_access_key_id => 'AKIAWX5GLZKAQIFDZJCM',
                     aws_secret_access_key => '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',
-                    retry => 1
+                    region => 'us-east-2'
+
             });
 
-            my $bucket =  $s3->bucket('hackathon-test-bbva-2021');
-            $bucket->add_key(time, $archivo->content, { content_type => 'text/plain'});
+            my $response = $s3->put_object('hackathon-test-bbva-2021',time.'.csv', $archivo->content, { content_type => 'text/plain'});
+                    debug $response->code;
+                    debug $response->as_string;
+                    debug $response->is_success;
     }
 
     return template 'enviar';
