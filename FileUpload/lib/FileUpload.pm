@@ -38,4 +38,9 @@ get '/.well-known/pki-validation/:file' => sub {
         send_file( params->{file} );
 };
 
+get '/revisar' => sub {
+        my $url = 'https://www.google.com';
+        return template 'revisar', { url => $url };
+};
+
 true;

@@ -1,0 +1,4 @@
+<div class="w3-row">
+<iframe src="<% url %>" class="w3-col" height=380px>
+</iframe>
+</div>
