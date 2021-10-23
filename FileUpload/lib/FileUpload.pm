@@ -40,7 +40,7 @@ get '/.well-known/pki-validation/:file' => sub {
 get '/revisar' => sub {
         my $url = 'https://www.google.com';
         
-        my $response = `aws quicksight get-dashboard-embed-url --namespace default --dashboard-id 0fd6237e-e629-49d1-a4fc-005f13cdc396 --identity-type ANONYMOUS --aws-account-id 463668497025 --namespace default`;
+        my $response = `aws quicksight get-dashboard-embed-url --namespace default --dashboard-id 14183d20-abbb-4b6e-978d-dffe8620dcbe --identity-type ANONYMOUS --aws-account-id 463668497025 --namespace default`;
 
         my $response_ref = from_json($response);
 
