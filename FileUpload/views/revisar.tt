@@ -1,4 +1,35 @@
-<div class="w3-row">
-<iframe src="<% url %>" class="w3-col" height=380px>
-</iframe>
-</div>
+<script src="https://unpkg.com/amazon-quicksight-embedding-sdk@1.18.0/dist/quicksight-embedding-js-sdk.min.js"></script>
+<script type="text/javascript">
+            var dashboard
+            function onDashboardLoad(payload) {
+                console.log("Exito");
+            }
+
+            function onError(payload) {
+                console.log("Error");
+            }
+
+           function embedDashboard() {
+                var containerDiv = document.getElementById("embeddingContainer");
+                var options = {
+                    url: "<% url %>",
+                    container: containerDiv,
+                    parameters: {
+                        country: "United States"
+                    },
+                    scrolling: "no",
+                    height: "500px",
+                    width: "100%",
+                    locale: "en-US",
+                    footerPaddingEnabled: true
+                };
+                dashboard = QuickSightEmbedding.embedDashboard(options);
+                dashboard.on("error", onError);
+                dashboard.on("load", onDashboardLoad);
+            }
+</script>
+ 
+<div id="embeddingContainer"></div>
+<script>
+    embedDashboard();
+</script>
