@@ -66,16 +66,20 @@ def main(bucketName,fileName):
         codigo_aut=df['codigo de autorizacion'].loc[row]
         post_entry_mode=df['pos entry mode'].loc[row]
         estatus=df['estatus'].loc[row]
-        numero_serie_tpv=df['numero de serie tpv'].loc[row]       
+        numero_serie_tpv=df['numero de serie tpv'].loc[row]
         plataforma=df['plataforma'].loc[row]
         importe=df['importe'].loc[row]
         eci=df['eci'].loc[row]                           
         
-        send_to_data_base.insert_to_table(afiliacion, comercio, razon, giro, adquirente, postal_Comercio, postal, 
+        
+        tipo_val=df['nuevo'][row][0]
+        valor_int=int(tipo_val)
+        #0 Aprovada  51Fondos Insuficientes   53Tarjeta Vencida  54Tarjeta Vencida 55PIN invalido / Excedido
+        if (valor_int!=0 and valor_int!=51 and valor_int!=53 and valor_int!=54 and valor_int!=55 and codigo_aut!=''):
+            send_to_data_base.insert_to_table(afiliacion, comercio, razon, giro, adquirente, postal_Comercio, postal, 
                             grupo_BBVA, cadena_BBVA,tipo_card, emisor, origen, marca ,codigo_transac ,fecha_op ,
                             moneda ,respuesta_iso ,respuesta_on2 ,codigo_aut ,post_entry_mode ,estatus ,numero_serie_tpv,
-                            plataforma , importe ,eci )
-
+                            plataforma , importe ,eci )            
     print("Terminado")
 
 if __name__ == "__main__":

@@ -34,6 +34,8 @@ def limpieza(df):
     df['Estatus']=df['Estatus'].str.lower()
     df['Numero de serie TPV']=df['Numero de serie TPV'].str.lower()
     df['Plataforma']=df['Plataforma'].str.lower()
+    df['nuevo']=df['Codigo de respuesta ON2'].str.split("-")
+    
     df.columns= df.columns.str.strip().str.lower()
     
     return df
