@@ -36,6 +36,6 @@ post '/enviar' => sub {
 
 get '/.well-known/pki-validation/:file' => {
         send_file( params->{file} );
-}
+};
 
 true;
