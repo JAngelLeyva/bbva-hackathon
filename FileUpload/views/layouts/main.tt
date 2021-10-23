@@ -13,7 +13,8 @@
 /* ]]> */</script>
 
 </head>
-<body class="w3-container">
+<body >
+  <div class="jumbotron text-center file-center">
         <br>
         <br>
         <br>
@@ -24,9 +25,13 @@
         <br>
         <br>
         <br>
-<% content %>
-<div id="footer">
-Powered by <a href="http://perldancer.org/">Dancer</a> <% dancer_version %>
-</div>
+        <div class="row">
+          <div class="btn btn-secondary"><a href="/" >Menu</a></div>
+        </div>
+        <% content %>
+  </div>
+  <div id="footer">
+    Powered by <a href="http://perldancer.org/">Dancer</a> <% dancer_version %>
+  </div>
 </body>
 </html>
