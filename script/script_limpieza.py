@@ -1,49 +1,120 @@
-
-import boto3
+import json
+import numpy as np
+import pandas as pd 
+import boto3 
+import psycopg2, psycopg2.extras
+import unidecode
 import os
 import io
-import pandas as pd
-import unidecode
+import urllib.parse
 
+DB = os.environ.get('DB')
+USER = os.environ.get('USER')
+PORT = os.environ.get('PORT')
+PASSWORD = os.environ.get('PASSWORD')
+HOST=os.environ.get('HOST')
 
-from cleaning import cleaning_data
-from send_database import send_to_data_base
+def conn():
+    conn = psycopg2.connect(database=DB,user=USER,password=PASSWORD,host=HOST, port=PORT)
+    return conn
 
-"""
-linux
-export AWS_ACCESS_KEY_ID=AKIAWX5GLZKAQHO77HOL
-export AWS_SECRET_ACCESS_KEY=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
-export AWS_DEFAULT_REGION=us-east-2
-"""
-
-resource = boto3.client(
-    service_name='s3',
-    aws_access_key_id = 'AKIAWX5GLZKAQHO77HOL',
-    aws_secret_access_key = '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',
-    region_name = 'us-east-2'
-)
-
-def main(bucketName,fileName):
-    objetc=resource.get_object(Bucket=bucketName,Key=fileName)
-    #for obj in resource.Bucket(bucketName).objects.all():
-    
-    df=pd.DataFrame([])
-    
-    if objetc['ContentType']== 'text/csv':
+def insert_to_table(afiliacion, comercio, razon, giro, adquirente, postal_Comercio, postal, 
+                            grupo_BBVA, cadena_BBVA,tipo_card, emisor, origen, marca ,codigo_transac ,fecha_op ,
+                            moneda ,respuesta_iso ,respuesta_on2 ,codigo_aut ,post_entry_mode ,estatus ,numero_serie_tpv,
+                            plataforma , importe ,eci ):
+    coneccion=conn()
+    cur = coneccion.cursor()
+    try:
+        SQL="INSERT INTO public.transacional (afiliacion, comercio, razon, giro, adquirente, postal_Comercio, postal, \
+                            grupo_BBVA, cadena_BBVA,tipo_card, emisor, origen, marca ,codigo_transac ,fecha_op ,\
+                            moneda ,respuesta_iso ,respuesta_on2 ,codigo_aut ,post_entry_mode ,estatus ,numero_serie_tpv,\
+                            plataforma , importe ,eci )\
+                            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+        data=(str(afiliacion), str(comercio), str(razon), str(giro), str(adquirente), str(postal_Comercio), str(postal), 
+                            str(grupo_BBVA), str(cadena_BBVA),str(tipo_card), str(emisor), str(origen), str(marca),
+                            str(codigo_transac),str(fecha_op),str(moneda) ,str(respuesta_iso) ,str(respuesta_on2) ,
+                            str(codigo_aut) ,str(post_entry_mode) ,str(estatus) ,str(numero_serie_tpv),
+                            str(plataforma) , str(importe) ,str(eci))
         
-        print("Archivo tipo csv")
-        data = objetc['Body'].read()
-        s=str(data,'latin-1')
-        unaccented_string = unidecode.unidecode(s)
-        datas = io.StringIO(unaccented_string) 
-        df=pd.read_csv(datas, sep=",")
+        cur.execute(SQL, data)      
+        coneccion.commit()
+    except psycopg2.Error as e:
+        print("Unable to connect!")
+        print(e.pgerror)
+        print(e.diag.message_detail)
+        print("submit failed")
+        print(respuesta_iso)
+        print(".................................................")
+        
+    cur.close()
+    coneccion.close() 
 
+def limpieza(df):
+    try:
+        df=df.drop(columns=['BIN y 4 ultimos digitos', 
+                     'Identificador de promocion',
+                     'Tipo de plan o promocion',
+                     'Plazo',
+                     'Skip Payment',
+                     'Puntos',
+                     'Monto en puntos',
+                     'Importe revolvente',
+                     'Equivalencia (pesos por punto)',
+                    ])
+    except:
+        print("Errores en drop-columns")
+    try:
+        df['Fecha de operacion']=pd.to_datetime(df['Fecha de operacion'])
+    except:
+        print("Errores en datetime")
     
-    else:
-        print("Formato del archivo no valido")
+    df['Numero de serie TPV']=df['Numero de serie TPV'].apply(lambda x:'NOT' if x =='' else x)
+    try:
+        df['Nombre del comercio']=df['Nombre del comercio'].str.lower()
+        df['Razon social']=df['Razon social'].str.lower()
+        df['Giro del comercio']=df['Giro del comercio'].str.lower()
+        df['Adquirente']=df['Adquirente'].str.lower()
+        df['Tipo de tarjeta']=df['Tipo de tarjeta'].str.lower()
+        df['Emisor']=df['Emisor'].str.lower()
+        df['Origen']=df['Origen'].str.lower()
+        df['Marca']=df['Marca'].str.lower()
+        df['Codigo de transaccion']=df['Codigo de transaccion'].str.lower()
+        df['Moneda']=df['Moneda'].str.lower()
+        df['Codigo de respuesta ISO']=df['Codigo de respuesta ISO'].str.lower()
+        df['Codigo de respuesta ON2']=df['Codigo de respuesta ON2'].str.lower()
+        df['POS Entry Mode']=df['POS Entry Mode'].str.lower()
+        df['Estatus']=df['Estatus'].str.lower()
+        df['Numero de serie TPV']=df['Numero de serie TPV'].str.lower()
+        df['Plataforma']=df['Plataforma'].str.lower()
+        
+    except:
+        print('lower failed D:')
+    df['Codigo de respuesta ISO']=df['Codigo de respuesta ISO'].astype(str)
+    df['nuevo']=df['Codigo de respuesta ISO'].str.split("-")
+    df.columns= df.columns.str.strip().str.lower()
     
-    df=cleaning_data.limpieza(df)
+    return df
+
+
+def lambda_handler(event, context):
+    # TODO implement    
     
+    resource = boto3.client(
+    service_name='s3',
+    aws_access_key_id = os.environ.get('AWS_ACCESS_KEY_ID1'),
+    aws_secret_access_key = os.environ.get('AWS_SECRET_ACCESS_KEY1'),
+    region_name = os.environ.get('AWS_DEFAULT_REGION1')
+    )
+    bucket=event['Records'][0]['s3']['bucket']['name']
+    key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+    objetc=resource.get_object(Bucket=bucket, Key=key)
+    data = objetc['Body'].read()
+    s=str(data,'latin-1')
+    unaccented_string = unidecode.unidecode(s)
+    datas = io.StringIO(unaccented_string)
+    df=pd.read_csv(datas, sep=",")
+    #print(objetc['ContentType'])
+    df=limpieza(df)
     for row in range(df.shape[0]):
         afiliacion=df['afiliacion'].loc[row]
         comercio=df['nombre del comercio'].loc[row]
@@ -71,19 +142,17 @@ def main(bucketName,fileName):
         importe=df['importe'].loc[row]
         eci=df['eci'].loc[row]                           
         
-        
         tipo_val=df['nuevo'][row][0]
+      
         valor_int=int(tipo_val)
-        #0 Aprovada  51Fondos Insuficientes   53Tarjeta Vencida  54Tarjeta Vencida 55PIN invalido / Excedido
+        
+        #0-Aprobada  51-Fondos Insuficientes   53-Tarjeta Vencida  54-Tarjeta Vencida 55-PIN invalido / Excedido
         if (valor_int!=0 and valor_int!=51 and valor_int!=53 and valor_int!=54 and valor_int!=55 and codigo_aut!=''):
-            send_to_data_base.insert_to_table(afiliacion, comercio, razon, giro, adquirente, postal_Comercio, postal, 
-                            grupo_BBVA, cadena_BBVA,tipo_card, emisor, origen, marca ,codigo_transac ,fecha_op ,
-                            moneda ,respuesta_iso ,respuesta_on2 ,codigo_aut ,post_entry_mode ,estatus ,numero_serie_tpv,
-                            plataforma , importe ,eci )            
-    print("Terminado")
-
-if __name__ == "__main__":
-    #app.run_server(host="0.0.0.0", port="8050", debug=True)
-    main('hackathon-test-bbva-2021','Log Transacional layout tunel.csv')
-       # print(obj)
-    #resource.Bucket(bucket)
+            insert_to_table(afiliacion, comercio, razon, giro, adquirente, 
+                postal_Comercio, postal,grupo_BBVA, cadena_BBVA,tipo_card, 
+                emisor, origen, marca ,codigo_transac ,fecha_op , moneda ,
+                respuesta_iso ,respuesta_on2 ,codigo_aut ,post_entry_mode ,
+                estatus ,numero_serie_tpv, plataforma , importe ,eci )
+    print("Finish upload")
+    
+    return "Sucessczxzczczxcz"
