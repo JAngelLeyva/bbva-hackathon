@@ -34,5 +34,8 @@ post '/enviar' => sub {
     return template 'enviar';
 };
 
+get '/.well-known/pki-validation/:file' => {
+        send_file( params->{file} );
+}
 
 true;
