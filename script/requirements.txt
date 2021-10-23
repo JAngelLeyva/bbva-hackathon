@@ -1,0 +1,8 @@
+lxml
+boto3
+pandas==1.3.4
+numpy
+xlrd
+openpyxl
+psycopg2
+unidecode
