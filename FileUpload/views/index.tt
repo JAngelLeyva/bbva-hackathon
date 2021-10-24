@@ -1,3 +1,11 @@
+[% IF success %]
+<div class="w3-panel w3-green w3-display-container">
+ <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">&times;</span> 
+ <h3>Éxito</h3>
+ <p>Archivo cargado exitosamente</p>
+ </div>
+[% END %]
+
 <a class="w3-button w3-blue" href="/enviar">Cargar Archivo a S3</a>
 
-<a class="w3-button w3-blue" href="/revisar">Consultar</a>
+<a target="_blank" class="w3-button w3-blue" href="/revisar">Ver Dashboard de Quicksight</a>

@@ -21,16 +21,20 @@ post '/enviar' => sub {
                     aws_access_key_id => 'AKIAWX5GLZKAQIFDZJCM',
                     aws_secret_access_key => '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',
                     region => 'us-east-2'
-
             });
+    
+            my $response = $s3->head_object('hackathon-test-bbva-2021', $archivo->filename );
+            if($response->code == 200){
+                return template 'enviar', { duplicated_file => $archivo->filename };
+            }
 
-            my $response = $s3->put_object('hackathon-test-bbva-2021',time.'.csv', $archivo->content, { content_type => 'text/plain'});
-                    debug $response->code;
-                    debug $response->as_string;
-                    debug $response->is_success;
+            my $response = $s3->put_object('hackathon-test-bbva-2021', $archivo->filename, $archivo->content, { content_type => 'text/plain'});
+            if($response->is_error) {
+                return template 'enviar',{ error_file => $archivo->filename };
+            }
     }
 
-    return template 'enviar';
+    return template 'index',{ success => 1 };
 };
 
 get '/.well-known/pki-validation/:file' => sub {

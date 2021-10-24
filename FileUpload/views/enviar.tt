@@ -1,5 +1,22 @@
-        <form method="post" enctype="multipart/form-data">
-            <label for="archivo">Selecciona el archivo</label>
-            <input type="file" name="archivo"><br>
-            <input type="submit" value="Enviar">
-        </form>
+[% IF error_file %]
+<div class="w3-panel w3-red w3-display-container">
+ <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">&times;</span> 
+ <h3>Error</h3>
+ <p>Ocurrió un error al tratar de enviar el archivo [% error_file %]</p>
+ </div>
+[% END %]
+
+[% IF duplicated_file %]
+<div class="w3-panel w3-orange  w3-display-container">
+ <span onclick="this.parentElement.style.display='none'" class="w3-button w3-display-topright">&times;</span> 
+ <h3>Archivo duplicado</h3>
+ <p>Ya existe un archivo <strong>[% duplicated_file %]</strong> en S3</p>
+ </div>
+[% END %]
+
+<form method="post" enctype="multipart/form-data" class="w3-padding">
+    <label for="archivo">Selecciona el archivo</label>
+    <input type="file" name="archivo" class="w3-button w3-input"><br>
+    <a href="/" class="w3-button w3-gray">Volver</a>
+    <input type="submit" class="w3-button w3-blue" value="Enviar">
+</form>
