@@ -18,9 +18,9 @@ post '/enviar' => sub {
 
     foreach my $archivo (@archivos) {
             my $s3 = Amazon::S3::Thin->new({
-                    aws_access_key_id => 'AKIAWX5GLZKAQIFDZJCM',
-                    aws_secret_access_key => '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',
-                    region => 'us-east-2'
+                    aws_access_key_id => '',
+                    aws_secret_access_key => '',
+                    region => ''
             });
     
             my $response = $s3->head_object('hackathon-test-bbva-2021', $archivo->filename );
@@ -44,7 +44,7 @@ get '/.well-known/pki-validation/:file' => sub {
 get '/revisar' => sub {
         my $url = 'https://www.google.com';
         
-        my $response = `aws quicksight get-dashboard-embed-url --namespace default --dashboard-id 14183d20-abbb-4b6e-978d-dffe8620dcbe --identity-type ANONYMOUS --aws-account-id 463668497025 --namespace default`;
+        my $response = `aws quicksight get-dashboard-embed-url --namespace default --dashboard-id 14183d20-abbb-4b6e-978d-dffe8620dcbe --identity-type ANONYMOUS --aws-account-id  --namespace default`;
 
         my $response_ref = from_json($response);
 
